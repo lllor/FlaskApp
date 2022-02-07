@@ -1,0 +1,44 @@
+<!-- https://frontendresource.com/css-button-templates/ -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Landing Page</title>
+        <link rel= "stylesheet" type= "text/css" href= "../static/styles/mainpage.css">
+    </head>
+    <body>
+
+        <h1><span>Image</span> Storage System</h1>
+
+        <!-- Flex Container -->
+        <div id="container">
+
+            <div class="button" id="button-upload">
+                <div id="upload-circle"></div>
+                <a href="{{url_for('upload_form')}}">Upload image</a>
+            </div>
+        
+            <div class="button" id="button-search">
+                <div id="search-circle"></div>
+                <a href="{{url_for('image_search_form')}}">Search image</a>
+            </div>
+        
+            <div class="button" id="button-show-keys">
+                <div id="show-keys-circle"></div>
+                <a href="{{url_for('show_key_list')}}">Show all keys</a>
+            </div>
+
+            <div class="button" id="button-config">
+                <div id="config-circle"></div>
+                <a href="{{url_for('show_memcache_config_form')}}">Change config</a>
+            </div>
+            
+            <div class="button" id="button-check-statistics">
+                <div id="check-statistics-circle"></div>
+                <a href="{{url_for('memcache_statistic')}}">Check statistics</a>
+            </div>
+
+    <!-- End Container -->
+        </div>
+
+    </body>
+</html>

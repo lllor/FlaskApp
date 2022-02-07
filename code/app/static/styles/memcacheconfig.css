@@ -1,0 +1,130 @@
+body {
+  background: #2D3142;
+  font-family: 'Raleway', sans-serif;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+h1 {
+    font-size: 1.5em;
+    text-align: center;
+    padding: 70px 0 0 0;
+    color: #EF8354;
+    font-weight: 300;
+    letter-spacing: 1px;
+    margin-bottom: 70px;
+  }
+  
+span {
+    border: 2px solid #4F5D75;
+    padding: 10px;
+}
+
+
+label {
+    color: #BFC0C0;
+}
+
+#capacity {
+    position: relative;
+    height: 20px;
+    width: 30%; 
+    margin-top: 20px;
+}
+
+#capacity{
+    margin-bottom: 70px;
+}
+  
+
+
+.custom-select {
+    margin-top: 20px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    height: 30px;
+    background: #fff url("select-arrows.svg") no-repeat right 16px center;
+    background-size: 10px;
+    transition: border-color .1s ease-in-out,box-shadow .1s ease-in-out;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    margin-bottom: 70px;
+}
+.custom-select:hover {
+    border: 1px solid #999;
+}
+.custom-select:focus {
+    border: 1px solid #999;
+    box-shadow: 0 3px 5px 0 rgba(0,0,0,.2);
+    outline: none;
+}
+/* remove default arrow in IE */
+select::-ms-expand {
+    display:none;
+}
+
+input[type="submit"] {
+    display: none;
+} 
+
+/* upload */
+#button-submit {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+    
+#button-submit a {
+    position: relative;
+    transition: all .45s ease-Out;
+}
+
+form {
+    display: inline-block;
+    width: 100%;
+    margin: 0 auto;
+    padding: 50px 0 150px 0;
+}
+    
+#submit-circle {
+    width: 0%;
+    height: 0%;
+    opacity: 0;
+    line-height: 40px;
+    border-radius: 50%;
+    background: #BFC0C0;
+    position: absolute;
+    transition: all .5s ease-Out;
+    top: 20px;
+    left: 70px;
+}
+    
+#button-submit:hover #submit-circle {
+    width: 200%;
+    height: 500%;
+    opacity: 1;
+    top: -70px;
+    left: -70px;
+}
+    
+#button-submit:hover a {
+    color: #2D3142;
+}
+
+.button {
+    display: inline-flex;
+    height: 40px;
+    width: 150px;
+    border: 2px solid #BFC0C0;
+    color: #BFC0C0;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: .8em;
+    letter-spacing: 1.5px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+

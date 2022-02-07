@@ -1,0 +1,18 @@
+<table class="container">
+    <tbody>
+        <tr>
+            <td id="keys">items_num</td>
+            <td id="keys">item_size</td>
+            <td id="keys">request_num</td>
+            <td id="keys">miss_rate</td>
+            <td id="keys">hit_rate</td>
+        </tr>
+        <tr>
+            <td id="keys">{{ row[1]}}</td>
+            <td id="keys">{{ row[2]}}</td>
+            <td id="keys">{{ row[3]}}</td>
+            <td id="keys">{{ row[4]}}</td>
+            <td id="keys">{{ row[5]}}</td>
+        </tr>
+    </tbody>
+</table>

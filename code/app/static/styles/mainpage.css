@@ -1,0 +1,239 @@
+@import url('https://fonts.googleapis.com/css?family=Raleway:300,400');
+body {
+  background: #2D3142;
+  font-family: 'Raleway', sans-serif;
+}
+
+h1 {
+    font-size: 1.5em;
+    text-align: center;
+    padding: 70px 0 0 0;
+    color: #EF8354;
+    font-weight: 300;
+    letter-spacing: 1px;
+  }
+  
+  span {
+    border: 2px solid #4F5D75;
+    padding: 10px;
+  }
+  
+
+/* Layout Styling */
+
+#container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 50px 0 150px 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+.button {
+    display: inline-flex;
+    height: 40px;
+    width: 150px;
+    border: 2px solid #BFC0C0;
+    margin: 20px 20px 20px 20px;
+    color: #BFC0C0;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: .8em;
+    letter-spacing: 1.5px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    }
+
+a {
+    color: #BFC0C0;
+    text-decoration: none;
+    letter-spacing: 1px;
+    }
+
+/* upload */
+#button-upload {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+    
+#button-upload a {
+    position: relative;
+    transition: all .45s ease-Out;
+}
+    
+#upload-circle {
+    width: 0%;
+    height: 0%;
+    opacity: 0;
+    line-height: 40px;
+    border-radius: 50%;
+    background: #BFC0C0;
+    position: absolute;
+    transition: all .5s ease-Out;
+    top: 20px;
+    left: 70px;
+}
+    
+#button-upload:hover #upload-circle {
+    width: 200%;
+    height: 500%;
+    opacity: 1;
+    top: -70px;
+    left: -70px;
+}
+    
+#button-upload:hover a {
+    color: #2D3142;
+}
+
+/* search */
+#button-search {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+    
+#button-search a {
+    position: relative;
+    transition: all .45s ease-Out;
+}
+    
+#search-circle {
+    width: 0%;
+    height: 0%;
+    opacity: 0;
+    line-height: 40px;
+    border-radius: 50%;
+    background: #BFC0C0;
+    position: absolute;
+    transition: all .5s ease-Out;
+    top: 20px;
+    left: 70px;
+}
+    
+#button-search:hover #search-circle {
+    width: 200%;
+    height: 500%;
+    opacity: 1;
+    top: -70px;
+    left: -70px;
+}
+    
+#button-search:hover a {
+    color: #2D3142;
+}
+
+/* show-keys */
+#button-show-keys {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+    
+#button-show-keys a {
+    position: relative;
+    transition: all .45s ease-Out;
+}
+    
+#show-keys-circle {
+    width: 0%;
+    height: 0%;
+    opacity: 0;
+    line-height: 40px;
+    border-radius: 50%;
+    background: #BFC0C0;
+    position: absolute;
+    transition: all .5s ease-Out;
+    top: 20px;
+    left: 70px;
+}
+    
+#button-show-keys:hover #show-keys-circle {
+    width: 200%;
+    height: 500%;
+    opacity: 1;
+    top: -70px;
+    left: -70px;
+}
+    
+#button-show-keys:hover a {
+    color: #2D3142;
+}
+
+/* config */
+#button-config {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+    
+#button-config a {
+    position: relative;
+    transition: all .45s ease-Out;
+}
+    
+#config-circle {
+    width: 0%;
+    height: 0%;
+    opacity: 0;
+    line-height: 40px;
+    border-radius: 50%;
+    background: #BFC0C0;
+    position: absolute;
+    transition: all .5s ease-Out;
+    top: 20px;
+    left: 70px;
+}
+    
+#button-config:hover #config-circle {
+    width: 200%;
+    height: 500%;
+    opacity: 1;
+    top: -70px;
+    left: -70px;
+}
+    
+#button-config:hover a {
+    color: #2D3142;
+}
+
+/* check-statistics */
+#button-check-statistics {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+    
+#button-check-statistics a {
+    position: relative;
+    transition: all .45s ease-Out;
+}
+    
+#check-statistics-circle {
+    width: 0%;
+    height: 0%;
+    opacity: 0;
+    line-height: 40px;
+    border-radius: 50%;
+    background: #BFC0C0;
+    position: absolute;
+    transition: all .5s ease-Out;
+    top: 20px;
+    left: 70px;
+}
+    
+#button-check-statistics:hover #check-statistics-circle {
+    width: 200%;
+    height: 500%;
+    opacity: 1;
+    top: -70px;
+    left: -70px;
+}
+    
+#button-check-statistics:hover a {
+    color: #2D3142;
+}

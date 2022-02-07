@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css?family=Raleway:300,400');
+body {
+  background: #2D3142;
+  font-family: 'Raleway', sans-serif;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+h1 {
+    font-size: 1.5em;
+    text-align: center;
+    padding: 70px 0 0 0;
+    color: #EF8354;
+    font-weight: 300;
+    letter-spacing: 1px;
+  }
+  
+  span {
+    border: 2px solid #4F5D75;
+    padding: 10px;
+  }
+
+  
+.button {
+    display: inline-flex;
+    height: 40px;
+    width: 150px;
+    border: 2px solid #BFC0C0;
+    margin: 70px 20px 20px 20px;
+    color: #BFC0C0;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-size: .8em;
+    letter-spacing: 1.5px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+a {
+    color: #BFC0C0;
+    text-decoration: none;
+    letter-spacing: 1px;
+    }
+/* key */
+#file_key {
+    position: relative;
+    height: 20px;
+    width: 50%; 
+}
+#key_label {
+    color: #BFC0C0;
+}
+/* select */
+#button-select {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+    
+#button-select a {
+    position: relative;
+    transition: all .45s ease-Out;
+}
+    
+#select-circle {
+    width: 0%;
+    height: 0%;
+    opacity: 0;
+    line-height: 40px;
+    border-radius: 50%;
+    background: #BFC0C0;
+    position: absolute;
+    transition: all .5s ease-Out;
+    top: 20px;
+    left: 70px;
+}
+    
+#button-select:hover #select-circle {
+    width: 200%;
+    height: 500%;
+    opacity: 1;
+    top: -70px;
+    left: -70px;
+}
+    
+#button-select:hover a {
+    color: #2D3142;
+}
+
+/* upload */
+#button-upload {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+    
+#button-upload a {
+    position: relative;
+    transition: all .45s ease-Out;
+}
+
+form {
+    display: inline-block;
+    width: 100%;
+    margin: 0 auto;
+    padding: 50px 0 150px 0;
+}
+    
+#upload-circle {
+    width: 0%;
+    height: 0%;
+    opacity: 0;
+    line-height: 40px;
+    border-radius: 50%;
+    background: #BFC0C0;
+    position: absolute;
+    transition: all .5s ease-Out;
+    top: 20px;
+    left: 70px;
+}
+    
+#button-upload:hover #upload-circle {
+    width: 200%;
+    height: 500%;
+    opacity: 1;
+    top: -70px;
+    left: -70px;
+}
+    
+#button-upload:hover a {
+    color: #2D3142;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+input[type="submit"] {
+    display: none;
+}
+
+#file-name {
+    color:#BFC0C0;
+    
+}
