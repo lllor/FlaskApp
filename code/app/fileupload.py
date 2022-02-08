@@ -64,7 +64,7 @@ def upload_image():
         new_path = os.path.join(UPLOADS_PATH, dateTimeObj.strftime("%d-%b-%Y (%H:%M:%S.%f)")+filename)
         new_file.save(new_path)
     else:
-        return redirect(url_for('main'))
+        return render_template("errorpage.html", msg="invalid file name")
 
     cnx = get_db()
 
@@ -83,6 +83,8 @@ def upload_image():
         print("Error Code:", err.errno)
         print("SQLSTATE", err.sqlstate)
         print("Message", err.msg)
+        os.remove(new_path)
+        return render_template("errorpage.html", msg=err.msg)
 
     #TODO disable the key in memcache
     #invalidateKey(key)  to drop a specific key

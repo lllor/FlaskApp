@@ -30,6 +30,11 @@ h1 {
     flex-wrap: wrap;
     justify-content: center;
   }
+
+h2{
+    color: #BFC0C0;
+    display: inline-flex;
+}
   
 .button {
     display: inline-flex;

@@ -8,6 +8,7 @@ from app import imagekey
 from app import fileupload
 from app import memcacheconfig
 from app import memcachestatistic
+from app import testapi
 
 from app import main
 

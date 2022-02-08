@@ -1,0 +1,24 @@
+{% block content %}
+<!-- https://frontendresource.com/css-button-templates/ -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Error Page</title>
+        <link rel= "stylesheet" type= "text/css" href= "../static/styles/mainpage.css">
+    </head>
+    <body>
+
+        <h1><span>ERROR</span></h1>
+        <!-- Flex Container -->
+        <div id="container">
+            <h2>{{msg}}</h2>
+            <div class="button" id="button-upload">
+                <div id="upload-circle"></div>
+                <a href="{{url_for('main')}}">Back to main page</a>
+            </div>
+    <!-- End Container -->
+        </div>
+
+    </body>
+</html>
+{% endblock %}

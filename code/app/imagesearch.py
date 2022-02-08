@@ -70,7 +70,7 @@ def search_image():
             print("Error Code:", err.errno)
             print("SQLSTATE", err.sqlstate)
             print("Message", err.msg)
-            render_template("imagesearchform.html")
+            return render_template("errorpage.html", msg=err.msg)
 
     dictToSend = {key: key, content: encoded_img_data}
     res = requests.post('http://127.0.0.1:8000/api/add', data=dictToSend)

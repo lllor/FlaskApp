@@ -67,6 +67,7 @@ def config_memcache():
         print("Error Code:", err.errno)
         print("SQLSTATE", err.sqlstate)
         print("Message", err.msg)
+        return render_template("errorpage.html", msg=err.msg)
 
     #TODO notify memcache to refresh
     
