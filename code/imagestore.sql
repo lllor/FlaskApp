@@ -32,10 +32,9 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `imagedb`.`config` ;
 
 CREATE TABLE IF NOT EXISTS `imagedb`.`config` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `policy` INT NOT NULL,
   `capacity` INT NOT NULL,
-  `policy` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id`))
+  PRIMARY KEY (`capacity`))
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------
@@ -44,28 +43,28 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `imagedb`.`statistics` ;
 
 CREATE TABLE IF NOT EXISTS `imagedb`.`statistics` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `items_num` INT NOT NULL,
-  `item_size` INT NOT NULL,
   `request_num` INT NOT NULL,
+  `item_size` INT NOT NULL,
+  `item_num` INT NOT NULL,
+  `miss_num` INT NOT NULL,
+  `hit_num` INT NOT NULL,
   `miss_rate` FLOAT NOT NULL,
   `hit_rate` FLOAT NOT NULL,
-  `count` INT NOT NULL,
-  PRIMARY KEY (`id`))
+  PRIMARY KEY (`item_num`))
 ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Data for table `imagedb`.`config`
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `imagedb`;
-INSERT INTO `imagedb`.`config` (`id`, `capacity`, `policy`) VALUES (1, 20, 'Random Replacement');
+INSERT INTO `imagedb`.`config` (`policy`,`capacity`) VALUES (1,300);
 
 -- -----------------------------------------------------
 -- Data for table `imagedb`.`statistics`
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `imagedb`;
-INSERT INTO `imagedb`.`statistics` (`id`, `items_num`, `item_size`, `request_num`, `miss_rate`, `hit_rate`, `count` ) VALUES (1, 20, 2, 20, 19.8, 28.9, 20);
+INSERT INTO `imagedb`.`statistics` (`request_num`, `item_size`, `item_num`, `miss_num`, `hit_num`, `miss_rate`, `hit_rate` ) VALUES (1, 20, 2, 20, 19, 28.9, 20.9);
 
 COMMIT;
 

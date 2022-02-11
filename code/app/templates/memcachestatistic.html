@@ -9,18 +9,22 @@
             <table class="container">
                 <tbody>
                     <tr>
-                        <td id="keys">items_num</td>
-                        <td id="keys">item_size</td>
                         <td id="keys">request_num</td>
+                        <td id="keys">item_size</td>
+                        <td id="keys">item_num</td>
+                        <td id="keys">miss_num</td>
+                        <td id="keys">hit_num</td>
                         <td id="keys">miss_rate</td>
                         <td id="keys">hit_rate</td>
                     </tr>
                     <tr>
-                        <td id="keys">{{ row[1]}}</td>
+                        <td id="keys">{{ row[0]}}</td>
+                        <td id="keys">{{ row[1] / 1024}} M </td>
                         <td id="keys">{{ row[2]}}</td>
                         <td id="keys">{{ row[3]}}</td>
                         <td id="keys">{{ row[4]}}</td>
                         <td id="keys">{{ row[5]}}</td>
+                        <td id="keys">{{ row[6]}}</td>
                     </tr>
                 </tbody>
             </table>

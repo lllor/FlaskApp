@@ -83,16 +83,24 @@ def upload_image():
         print("Error Code:", err.errno)
         print("SQLSTATE", err.sqlstate)
         print("Message", err.msg)
-        os.remove(new_path)
-        return render_template("errorpage.html", msg=err.msg)
+        print(type(err.errno))
+        if err.errno == 1062:
+            print("here")
+            query = ('''UPDATE `image` SET `path`=%s where `key`=%s;''')
+            cursor.execute(query,(new_path,key))
+            cnx.commit()
+            
+        else:
+            os.remove(new_path)
+            return render_template("errorpage.html", msg=err.msg)
 
     #TODO disable the key in memcache
     #invalidateKey(key)  to drop a specific key
     dictToSend = {key: 'key'}
-    res = requests.post('http://127.0.0.1:8000/api/dropkey', data=dictToSend)
+    response = requests.post('http://192.168.40.128:5001/invalidate/'+key)
 
-    dictFromServer = res.json()
-    if dictFromServer['success']:
+
+    if response.status_code == 400 or response.status_code == 200:
         return redirect(url_for('main'))
     else:
-        return redirect(url_for('upload_form'))
+        return render_template("errorpage.html", msg="failed to save to memcache")

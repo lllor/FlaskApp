@@ -21,7 +21,7 @@ def api_list_key():
     test2 = {'success': True}
     return jsonify(test2)
 
-@webapp.route('/api/key/<key_value>', methods=['POST'])
-def api_search():
+@webapp.route('/api/key/<key>', methods=['POST'])
+def api_search(key):
     test2 = {'success': False}
     return jsonify(test2)

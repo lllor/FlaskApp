@@ -41,25 +41,28 @@ def show_memcache_config_form():
 
     rows = cursor.fetchall() 
 
-    check = rows[0][2] == 'Random Replacement'
+    check = rows[0][1] == 0
     print("rows",rows[0],check)
     key = rows[0][0]
     return render_template("memcacheconfig.html", data=rows[0], check = check)
 
 @webapp.route('/', methods=['POST'])
 def config_memcache():
-    new_policy = request.form.get('policy-select')
+    if request.form.get('policy-select') == "Random Replacement":
+        new_policy = 1
+    else:
+        new_policy = 0
     new_capacity = request.form.get('capacity')
 
     cnx = get_db()
 
     cursor = cnx.cursor()
 
-    query = (''' UPDATE `config` SET `capacity`= %s, `policy`=%s where id=%s; ''')
+    query = (''' UPDATE `config` SET `capacity`= %s, `policy`=%s limit 1''')
 
     
     try:
-        cursor.execute(query,(new_capacity,new_policy,key))
+        cursor.execute(query,(new_capacity,new_policy))
         cnx.commit()
         print("Success insert row into config", file=sys.stdout)
     except mysql.connector.Error as err:

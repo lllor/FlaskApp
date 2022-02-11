@@ -42,22 +42,22 @@ def search_image():
     key = request.form.get("file_key")
     print(request)
     dictToSend = {key: key}
-    res = requests.get('http://127.0.0.1:8000/api/search', data=dictToSend)
+
+    res = requests.get('http://192.168.40.128:5001/get/'+key)
 
     dictFromServer = res.json()
-    if dictFromServer['success']:
+    if res.status_code == 200:
         #return redirect(url_for('main'))
-        encoded_img_data = base64.b64encode(dictFromServer['content'])
+        #encoded_img_data = base64.b64encode(dictFromServer['content'])
+        encoded_img_data = dictFromServer['content'].encode('ascii')
         
-    else:
+    elif res.status_code == 400:
         cnx = get_db()
-
         cursor = cnx.cursor()
         query = (''' SELECT path FROM `image` WHERE `key` = %s ''')
         try:
             cursor.execute(query,(key,))
             rows = cursor.fetchall() 
-
             print("rows", rows[0][0])
             im = Image.open(rows[0][0])
             data = io.BytesIO()
@@ -72,7 +72,7 @@ def search_image():
             print("Message", err.msg)
             return render_template("errorpage.html", msg=err.msg)
 
-    dictToSend = {key: key, content: encoded_img_data}
-    res = requests.post('http://127.0.0.1:8000/api/add', data=dictToSend)
+    dictToSend = {'key': key, 'content': encoded_img_data}
+    res = requests.post('http://192.168.40.128:5001/put', json=dictToSend)
 
     return render_template("imagesearchresult.html", img_data=encoded_img_data.decode('utf-8'))
