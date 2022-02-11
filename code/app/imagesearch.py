@@ -40,7 +40,6 @@ def image_search_form():
 #Return image search form
 def search_image():
     key = request.form.get("file_key")
-    print(request)
     dictToSend = {key: key}
 
     res = requests.get('http://192.168.40.128:5001/get/'+key)
@@ -61,7 +60,7 @@ def search_image():
             print("rows", rows[0][0])
             im = Image.open(rows[0][0])
             data = io.BytesIO()
-            im.save(data, "JPEG")
+            im.save(data, rows[0][0].split(".")[-1])
             encoded_img_data = base64.b64encode(data.getvalue())
             
             #return render_template("imagesearchresult.html", img_link = '/home/lllor/Documents/ece1779/a1/aws_files/code/app/static/images/upload/test.jpeg')
@@ -75,4 +74,9 @@ def search_image():
     dictToSend = {'key': key, 'content': encoded_img_data}
     res = requests.post('http://192.168.40.128:5001/put', json=dictToSend)
 
-    return render_template("imagesearchresult.html", img_data=encoded_img_data.decode('utf-8'))
+    if res.status_code == 400 or res.status_code == 200:
+        return render_template("imagesearchresult.html", img_data=encoded_img_data.decode('utf-8'))
+    else:
+        return render_template("errorpage.html", msg="failed to save to memcache")
+
+    
