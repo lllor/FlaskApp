@@ -1,17 +1,16 @@
 import random
 
 from flask import render_template, url_for, request, g
-from app import  webapp, memcache, cache, totalRequest, totalMiss
+from app import webapp, memcache, cache, totalRequest, totalMiss
 from flask import json
 from sys import getsizeof
 from flask import jsonify
-
 
 from app.LRUCache import LRUCache
 from threading import Timer
 import mysql.connector
 from app.config import db_config
-
+import base64
 
 obj = LRUCache(300)
 
@@ -26,7 +25,6 @@ def connect_to_database():
                                    host=db_config['host'],
                                    database=db_config['database'],
                                    autocommit=True)
-
 
 
 def get_db():
@@ -46,10 +44,11 @@ def teardown_db(exception):
 # 计算size
 def cal():
     size = 0
-    for k in memcache.keys():
-        size += getsizeof(k)
+    # for k in memcache.keys():
+    # size += getsizeof(k)
     for k in memcache.values():
-        size += getsizeof(k)
+        pic = base64.b64decode(k)
+        size += getsizeof(pic) / 1024 / 1024
 
     return size
 
@@ -68,7 +67,6 @@ def ptimer(n):
     cnx = get_db()
 
     cursor = cnx.cursor()
-
 
     query = "update statistics set request_num=%s, miss_num=%s, hit_num=%s, hit_rate=%s, miss_rate=%s," \
             "item_num=%s, item_size=%s limit 1;"
@@ -118,8 +116,8 @@ def get(key):
     print("cache:", cache)
     print("memcache:", memcache)
     cnt += 1
-    print("key:",key)
-    #key = request.form.get('key')
+    print("key:", key)
+    # key = request.form.get('key')
     if rows[0][0] == '1':
         print("LRU")
         obj.getLRU(key)
@@ -128,7 +126,6 @@ def get(key):
 
     if key in memcache:
         value = memcache[key]
-        size = getsizeof(memcache)
         response = webapp.response_class(
             response=json.dumps({'content': value}),
             status=200,
@@ -147,7 +144,6 @@ def get(key):
 
 @webapp.route('/put', methods=['POST'])
 def put():
-
     cnx = get_db()
 
     cursor = cnx.cursor()
@@ -156,7 +152,7 @@ def put():
 
     cursor.execute(query)
     rows = cursor.fetchall()
-    #print(rows[0])
+    # print(rows[0])
     cnx.commit()
     obj.setCapacity(int(rows[0][1]))
     if rows[0][0] == '0':
@@ -164,37 +160,40 @@ def put():
             randomReplace()
 
     elif rows[0][0] == '1':
-
         while int(rows[0][1]) < cal():
             obj.deleteNode()
 
     key = request.json['key']
     value = request.json['content']
-    print("============================data:",key)
-    print("============================data:",value)
+    # print("============================data:",key)
+    # print("============================data:",value)
     print("type of value", type(value))
-    #print(getsizeof(key))
-    #print(getsizeof(value))
+    # print(getsizeof(key))
+    # print(getsizeof(value))
 
     if rows[0][0] == '0':
         print("random")
-        while cal() + getsizeof(key) + getsizeof(value) > int(rows[0][1]):
-            randomReplace()
+        pic = base64.b64decode(value)
+        if key not in memcache:
+            while cal() + getsizeof(pic) / 1024 / 1024 > int(rows[0][1]):
+                randomReplace()
+        else:
+            for key0 in memcache:
+                if key0 == key:
+                    curSize = getsizeof(memcache[key0]) / 1024 / 1024
+            while cal() + getsizeof(pic) / 1024 / 1024 - curSize > int(rows[0][1]):
+                randomReplace()
     if rows[0][0] == '1':
         print("LRU")
     obj.put(key, value)
     memcache[key] = value
+    # print("latest", cal())
     response = webapp.response_class(
         response=json.dumps("OK"),
         status=200,
         mimetype='application/json'
     )
-    '''else:
-        response = webapp.response_class(
-            response=json.dumps("out of"),
-            status=400,
-            mimetype='application/json'
-        )'''
+
     return response
 
 
@@ -215,7 +214,7 @@ def clear():
 
 @webapp.route('/invalidate/<key>', methods=['POST'])
 def invalidate(key):
-    #key = request.form.get('key')
+    # key = request.form.get('key')
     print("key: ", key)
     if key in memcache:
         obj.findNode(key)
@@ -236,39 +235,55 @@ def invalidate(key):
     return response
 
 
-@webapp.route('/config', methods=['POST'])
-def refreshConfiguration():
+@webapp.route('/config/<policy>/<capacity>', methods=['POST'])
+def refreshConfiguration(policy=3, capacity=-1):
     cnx = get_db()
     cursor = cnx.cursor()
-    policy = 0
-    capacity = 300
-    # query = "INSERT INTO `statistics ` (`total`, `miss`) VALUES (%s,%s);"
-    query = "update config set policy=%s, capacity=%s limit 1;"
-    # stat表字段还未写全
-    cursor.execute(query, (policy, capacity))
-    cnx.commit()
-    response = webapp.response_class(
-        response=json.dumps("OK"),
-        status=200,
-        mimetype='application/json'
-    )
-    return response
+    policy = int(policy)
+    capacity = int(capacity)
+    if policy == 3 and capacity == -1:
+        query = "select * from statistics;"
+        cursor.execute(query)
+        row = cursor.fetchone()
+        request_num = row[0]
+        hit_num = row[4]
+        miss_num = row[3]
+        hit_rate = row[6]
+        miss_rate = row[5]
+        item_num = row[2]
+        item_size = row[1]
+        response = webapp.response_class(
+            response=json.dumps({'request_num': request_num, 'item_size': item_size, 'item_num': item_num,
+                                 'miss_num': miss_num, 'hit_num': hit_num, 'miss_rate': miss_rate,
+                                 'hit_rate': hit_rate}),
+            status=200,
+            mimetype='application/json'
+        )
+    else:
+        # cnx = get_db()
+        # cursor = cnx.cursor()
+        # policy = 0
+        # capacity = 300
 
+        query = "update config set policy=%s, capacity=%s limit 1;"
 
-# 查看size
-@webapp.route('/mem', methods=['POST'])
-def mem():
-    # size = getsizeof(memcache)
-    size = 0
-    for k in memcache.keys():
-        size += getsizeof(k)
-    for k in memcache.values():
-        size += getsizeof(k)
-    response = webapp.response_class(
-        response=json.dumps(size),
-        status=200,
-        mimetype='application/json'
-    )
+        cursor.execute(query, (policy, capacity))
+        cnx.commit()
+
+        obj.setCapacity(int(capacity))
+        if policy == '0':
+            while int(capacity) < cal():
+                randomReplace()
+
+        elif policy == '1':
+            while int(capacity) < cal():
+                obj.deleteNode()
+
+        response = webapp.response_class(
+            response=json.dumps("ok"),
+            status=200,
+            mimetype='application/json'
+        )
 
     return response
 
@@ -281,43 +296,10 @@ def randomReplace():
     cache.pop(rep[0])
 
 
-# @webapp.route('/cache', methods=['POST'])
-def showCache():
-    print("cache:", cache)
-    print("memcache:", memcache)
-
-
-@webapp.route('/stat', methods=['POST'])
-def stat():
-    global x
-    print("here x ", x)
-    length = len(totalRequest)
-    print("len", length)
-    print("start", totalMiss.get(0))
-    print(totalMiss.get(length - 1))
-    if int(totalRequest.get(length - 1)) == 0:
-        hitRate = 0
-    elif length <= 121:
-        hitRate = 1 - (int(totalMiss.get(length - 1)) / int(totalRequest.get(length - 1)))
-    elif length > 121:
-        hitRate = 1 - (int(totalMiss.get(x % 121)) - int(totalMiss.get(x % 121)) + 1) / (
-                int(totalRequest.get(x % 121)) - int(totalRequest.get(x % 121)) + 1)
-    tmp = []
-    tmp.append(totalRequest)
-    tmp.append(hitRate)
-    response = webapp.response_class(
-        response=json.dumps(tmp),
-        status=200,
-        mimetype='application/json'
-    )
-
-    return response
-
-
 def rateStat():
     length = len(totalRequest)
     print("x and len", x, length)
-    print("ttrq", totalRequest)
+    # print("ttrq", totalRequest)
     if int(totalRequest.get(length - 1)) == 0:
         hitRate = 0
         missRate = 0
@@ -343,7 +325,7 @@ def rateStat():
             hitCnt = 0
         else:
             hitRate = 1 - (int(totalMiss.get(idx)) - int(totalMiss.get(x % 121))) / (
-                        int(totalRequest.get(idx)) - int(totalRequest.get(x % 121)))
+                    int(totalRequest.get(idx)) - int(totalRequest.get(x % 121)))
             missRate = 1 - hitRate
             missCnt = int(totalMiss.get(idx)) - int(totalMiss.get(x % 121))
             hitCnt = totalCnt - missCnt
@@ -357,6 +339,37 @@ def rateStat():
     # hitCnt = totalCnt - missCnt
     print("stat, hitRate, missRate, totalCnt, hitCnt, missCnt", hitRate, missRate, totalCnt, hitCnt, missCnt)
     return hitRate, missRate, totalCnt, hitCnt, missCnt
+
+
+@webapp.route('/changeSize', methods=['GET'])
+def changeSize():
+    cnx = get_db()
+
+    cursor = cnx.cursor()
+
+    query = "select * from config;"
+
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    print(rows[0])
+    cnx.commit()
+    obj.setCapacity(int(rows[0][1]))
+    if rows[0][0] == '0':
+        while int(rows[0][1]) < cal():
+            randomReplace()
+
+    elif rows[0][0] == '1':
+
+        while int(rows[0][1]) < cal():
+            obj.deleteNode()
+
+    response = webapp.response_class(
+        response=json.dumps("ok"),
+        status=200,
+        mimetype='application/json'
+    )
+
+    return response
 
 
 ptimer(5)

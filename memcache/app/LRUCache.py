@@ -1,3 +1,5 @@
+import base64
+
 from app import cache, memcache
 from sys import getsizeof
 
@@ -37,6 +39,9 @@ class LRUCache:
         return node.value
 
     def put(self, key: str, value: str) -> None:
+        pic = base64.b64decode(value)
+        new_cap = getsizeof(pic)
+        print("newcap", new_cap)
         if key not in cache:
             # 如果 key 不存在，创建一个新的节点
             node = DLinkedNode(key, value)
@@ -44,10 +49,7 @@ class LRUCache:
             cache[key] = node
             # 添加至双向链表的头部
             self.addToHead(node)
-            # self.size += 1
-            new_cap = getsizeof(key) + getsizeof(value)
-            print(self.cal() + new_cap/1024)
-            while self.cal() + new_cap/1024> self.getCapacity():
+            while self.cal() + new_cap / 1024 / 1024 > self.getCapacity():
                 print("size", self.cal())
                 print("self.capacity", self.getCapacity())
                 # 如果超出容量，删除双向链表的尾部节点
@@ -57,17 +59,27 @@ class LRUCache:
                 cache.pop(removed.key)
                 memcache.pop(removed.key)
 
-                # self.size -= 1
-            # self.size +=(getsizeof(key) + getsizeof(value))
         else:
             # 如果 key 存在，先通过哈希表定位，再修改 value，并移到头部
             node = cache[key]
             node.value = value
             self.moveToHead(node)
+            for key0 in memcache:
+                if key0 == key:
+                    curSize = getsizeof(memcache[key0]) / 1024 / 1024
+            while self.cal() + new_cap / 1024 / 1024 - curSize > self.getCapacity():
+                print("size", self.cal())
+                print("self.capacity", self.getCapacity())
+                # 如果超出容量，删除双向链表的尾部节点
+                removed = self.removeTail()
+                # 删除哈希表中对应的项
+                print(memcache)
+                cache.pop(removed.key)
+                memcache.pop(removed.key)
 
     def deleteNode(self):
         # total=self.cal()
-        while self.cal() > self.capacity:
+        while self.cal() > self.getCapacity():
             print("in delete", self.capacity)
             removed = self.removeTail()
             # 删除哈希表中对应的项
@@ -104,9 +116,8 @@ class LRUCache:
 
     def cal(self):
         size = 0
-        for k in memcache.keys():
-            size += getsizeof(k)
         for k in memcache.values():
-            size += getsizeof(k)
+            pic = base64.b64decode(k)
+            size += getsizeof(pic)
 
-        return size/1024
+        return size / 1024 / 1024
