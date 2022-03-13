@@ -48,16 +48,18 @@ def upload_image():
     key = request.form.get("file_key")
     dateTimeObj = datetime.now()
 
+    if len(key) >= 45 or len(key) < 1:
+        return render_template("errorpage.html", msg="invalid key value, please use a key with length at lest 1 char and at most 44 char")
     # check if the post request has the file part
     if 'uploadedimage' not in request.files:
-        print("Missing uploaded file", file=sys.stderr)
+        return render_template("errorpage.html", msg="missing uploaded file")
 
     new_file = request.files['uploadedimage']
 
     # if user does not select file, browser also
     # submit a empty part without filename
-    if new_file.filename == '':
-        print('Missing file name', file=sys.stderr)
+    if not new_file or new_file.filename == '':
+        return render_template("errorpage.html", msg="missing file name")
 
     if new_file and allowed_file(new_file.filename):
         filename = secure_filename(new_file.filename)
@@ -97,7 +99,10 @@ def upload_image():
     #TODO disable the key in memcache
     #invalidateKey(key)  to drop a specific key
     dictToSend = {key: 'key'}
-    response = requests.post('http://192.168.40.128:5001/invalidate/'+key)
+    try:
+        response = requests.post('http://localhost:5001/invalidate/'+key)
+    except requests.exceptions.ConnectionError as err:
+        return render_template("errorpage.html", msg="failed to connect to memcache")
 
 
     if response.status_code == 400 or response.status_code == 200:

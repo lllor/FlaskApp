@@ -6,6 +6,29 @@ body {
   font-weight: bold;
 }
 
+.column {
+    float: left;
+    width: 50%;
+  }
+  
+  /* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+.vertical {
+    border-left: 3px solid #EF8354;
+    height: 100%;
+    position:absolute;
+    left: 50%;
+}
+.vertical_2 {
+    border-left: 3px solid #EF8354;
+    height: 100%;
+    position:absolute;
+    left: 50%;
+}
 h1 {
     font-size: 1.5em;
     text-align: center;
@@ -24,19 +47,19 @@ span {
 
 label {
     color: #BFC0C0;
+    margin-bottom: 20px;
 }
 
 #capacity {
     position: relative;
     height: 20px;
-    width: 30%; 
+    width: 40%; 
     margin-top: 20px;
 }
 
 #capacity{
     margin-bottom: 70px;
 }
-  
 
 
 .custom-select {
@@ -85,7 +108,7 @@ form {
     display: inline-block;
     width: 100%;
     margin: 0 auto;
-    padding: 50px 0 150px 0;
+    padding: 0 0 0 0;
 }
     
 #submit-circle {

@@ -18,13 +18,13 @@
                         <td id="keys">hit_rate</td>
                     </tr>
                     <tr>
-                        <td id="keys">{{ row[0]}}</td>
-                        <td id="keys">{{ row[1] / 1024}} M </td>
-                        <td id="keys">{{ row[2]}}</td>
-                        <td id="keys">{{ row[3]}}</td>
-                        <td id="keys">{{ row[4]}}</td>
-                        <td id="keys">{{ row[5]}}</td>
-                        <td id="keys">{{ row[6]}}</td>
+                        <td id="keys">{{ data['request_num']}}</td>
+                        <td id="keys">{{ data['item_size']}} M </td>
+                        <td id="keys">{{ data['item_num']}}</td>
+                        <td id="keys">{{ data['miss_num']}}</td>
+                        <td id="keys">{{ data['hit_num']}}</td>
+                        <td id="keys">{{ data['miss_rate']}}</td>
+                        <td id="keys">{{ data['hit_rate']}}</td>
                     </tr>
                 </tbody>
             </table>

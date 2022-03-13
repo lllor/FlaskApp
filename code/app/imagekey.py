@@ -35,8 +35,12 @@ def show_key_list():
 
     
     query = (" SELECT * FROM image ")
-    cursor.execute(query, multi=True)
 
-    rows = cursor.fetchall() 
+    try:
+        cursor.execute(query, multi=True)
+        rows = cursor.fetchall()
+    except mysql.connector.Error as err:
+        return render_template("errorpage.html", msg=err.msg)
+
 
     return render_template("imagekey.html", rows=rows)

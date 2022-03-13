@@ -7,6 +7,7 @@ import tempfile
 import os
 import mysql.connector
 from app.config import db_config
+import requests
 
 def connect_to_database():
     return mysql.connector.connect(user=db_config['user'], 
@@ -29,13 +30,30 @@ def teardown_db(exception):
 @webapp.route('/memcache/stat',methods=['GET'])
 #Return file upload form
 def memcache_statistic():
+    try:
+        response = requests.post('http://localhost:5001/config/3/-1')
+    except requests.exceptions.ConnectionError as err:
+        return render_template("errorpage.html", msg="failed to connect to memcache")
+
+    if not response.status_code == 200:
+        return render_template("errorpage.html", msg="failed to read memcache statistics")
+    
     cnx = get_db()
 
     cursor = cnx.cursor()
 
     query = (" SELECT * FROM statistics ")
-    cursor.execute(query, multi=True)
+    
+    try:
+        cursor.execute(query, multi=True)
+        rows = cursor.fetchall()
+    except mysql.connector.Error as err:
+        return render_template("errorpage.html", msg=err.msg)
+    
 
-    rows = cursor.fetchall() 
+    while not response.json():
+        print("loading ...")
 
-    return render_template("memcachestatistic.html", row=rows[0])
+    #print(response.json())
+    #return redirect(url_for('main'))
+    return render_template("memcachestatistic.html", data=response.json())

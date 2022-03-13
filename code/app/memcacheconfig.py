@@ -7,6 +7,7 @@ import tempfile
 import os
 import mysql.connector
 from app.config import db_config
+import requests
 
 key = 1
 
@@ -37,22 +38,35 @@ def show_memcache_config_form():
 
     
     query = (" SELECT * FROM config ")
-    cursor.execute(query, multi=True)
 
-    rows = cursor.fetchall() 
+    try:
+        cursor.execute(query, multi=True)
+        rows = cursor.fetchall()
+    except mysql.connector.Error as err:
+        return render_template("errorpage.html", msg=err.msg)
 
-    check = rows[0][1] == 0
-    print("rows",rows[0],check)
-    key = rows[0][0]
-    return render_template("memcacheconfig.html", data=rows[0], check = check)
-
-@webapp.route('/', methods=['POST'])
-def config_memcache():
-    if request.form.get('policy-select') == "Random Replacement":
-        new_policy = 1
+    if len(rows) == 0:
+        return render_template("errorpage.html", msg="failed to read config information")
+            
+    check = rows[0][0] == 0
+    print(rows[0])
+    if check:
+        policy = "Random Replacement"
     else:
+        policy = "Least Recently Used"
+    key = rows[0][0]
+    return render_template("memcacheconfig.html", data=rows[0], check = check, policy=policy)
+
+@webapp.route('/config/update', methods=['POST'])
+def config_memcache():
+
+    if request.form.get('policy-select') == "Random Replacement":
         new_policy = 0
+    else:
+        new_policy = 1
     new_capacity = request.form.get('capacity')
+
+    print(new_capacity,new_policy)
 
     cnx = get_db()
 
@@ -72,6 +86,23 @@ def config_memcache():
         print("Message", err.msg)
         return render_template("errorpage.html", msg=err.msg)
 
-    #TODO notify memcache to refresh
-    
-    return render_template("main.html")
+    try:
+        response = requests.post('http://localhost:5001/config/'+str(new_policy)+'/'+str(new_capacity))
+    except requests.exceptions.ConnectionError as err:
+        return render_template("errorpage.html", msg="failed to connect to memcache")
+        
+
+
+    if response.status_code == 400 or response.status_code == 200:
+        return redirect(url_for('main'))
+    else:
+        return render_template("errorpage.html", msg="failed to save to memcache")
+
+@webapp.route('/config/clear',methods=['POST'])
+def clear_memcache():
+    try:
+        res = requests.post('http://localhost:5001/clear')
+    except requests.exceptions.ConnectionError as err:
+        return render_template("errorpage.html", msg="failed to connect to memcache")
+    return redirect(url_for('main'))
+

@@ -20,6 +20,7 @@ from PIL import Image
 import base64
 import io
 from werkzeug.datastructures import ImmutableMultiDict
+import filetype
 
 UPLOADS_PATH = join(dirname(realpath(__file__)), UPLOAD_FOLDER)
 test1 = {'hello':'world'}
@@ -56,20 +57,58 @@ def api_health():
 @webapp.route('/api/upload', methods=['POST'])
 def api_upload():
     key = request.form.get('key') 
+    if not request.files:
+        test2 = {
+            "success": "false",
+            "error": {
+                "code": 400,
+                "message": "failed to upload image: missing uploaded"
+            }
+        }
+        return jsonify(test2)
+
+    filename = request.files['file'].filename
+    print("filename:",filename.split('.')[-1])
+    if not filename or not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
+        test2 = {
+            "success": "false",
+            "error": {
+                "code": 400,
+                "message": "failed to upload image: missing uploaded file name"
+            }
+        }
+        return jsonify(test2)
+
+
     content = request.files['file'].read()
 
-    print("request: ", type(content))
+    #print("request: ", type(content))
     dateTimeObj = datetime.now()
-
+    new_path = os.path.join(UPLOADS_PATH, dateTimeObj.strftime("%d-%b-%Y (%H:%M:%S.%f)")+filename)
     # if user does not select file, browser also
     # submit a empty part without filename
     if not content:
-        print('Missing file', file=sys.stderr)
+        test2 = {
+            "success": "false",
+            "error": {
+                "code": 400,
+                "message": "failed to upload image: missing uploaded file"
+            }
+        }
+        return jsonify(test2)
 
-    filename = request.files['file'].filename
-    new_path = os.path.join(UPLOADS_PATH, dateTimeObj.strftime("%d-%b-%Y (%H:%M:%S.%f)")+filename)
-    image = Image.open(io.BytesIO(content))
-    image.save(new_path)
+    if len(key) >= 44 or len(key) < 1:
+        test2 = {
+            "success": "false",
+            "error": {
+                "code": 400,
+                "message": "failed to upload image: invalid key length"
+            }
+        }
+        return jsonify(test2)
+
+    with open(new_path, "wb") as fh:
+        fh.write(content)
 
     cnx = get_db()
 
@@ -117,7 +156,7 @@ def api_upload():
             "success": "false",
             "error": {
                 "code": 400,
-                "message": "failed to upload image: "+ err.message
+                "message": "failed to upload image: failed to connect backend"
             }
         }
         return jsonify(test2)
@@ -125,15 +164,14 @@ def api_upload():
     if response.status_code == 400 or response.status_code == 200:
         test2 = {'success': "true"}
         return jsonify(test2)
-    else:
-        test2 = {
-            "success": "false",
-            "error": {
-                "code": 400,
-                "message": "failed to upload image: unable to invalid the key"
-            }
+    test2 = {
+        "success": "false",
+        "error": {
+            "code": 400,
+            "message": "failed to upload image: unable to invalid the key"
         }
-        return jsonify(test2)
+    }
+    return jsonify(test2)
 
     
 
@@ -156,39 +194,88 @@ def api_list_key():
 
 @webapp.route('/api/key/<key>', methods=['POST'])
 def api_search(key):
-    res = requests.get('http://192.168.40.128:5001/get/'+key)
+    if not key or len(key)>=44 or len(key)<1:
+        test2 = {
+            "success": "false",
+            "error": {
+                "code": 400,
+                "message": "failed to load image: invalid key"
+            }
+        }
+        return jsonify(test2)
 
+
+    try:
+        res = requests.get('http://localhost:5001/get/'+key)
+    except requests.exceptions.ConnectionError as err:
+        print(err)
+        test2 = {
+            "success": "false",
+            "error": {
+                "code": 400,
+                "message": "failed to upload image: failed to connect backend"
+            }
+        }
+        return jsonify(test2)
     dictFromServer = res.json()
-    if res.status_code == 200:
+    if res.status_code == 200 and dictFromServer:
+        print("HERE")
         encoded_img_data = dictFromServer['content'].encode('ascii')
         
     elif res.status_code == 400:
         cnx = get_db()
+        print("HERE!!!!")
         cursor = cnx.cursor()
         query = (''' SELECT path FROM `image` WHERE `key` = %s ''')
         try:
             cursor.execute(query,(key,))
-            rows = cursor.fetchall() 
-            print("rows", rows[0][0])
-            im = Image.open(rows[0][0])
-            data = io.BytesIO()
-            im.save(data, rows[0][0].split(".")[-1])
-            encoded_img_data = base64.b64encode(data.getvalue())
+            rows = cursor.fetchall()
+            if len(rows) == 0:
+                test2 = {
+                    "success": "false",
+                    "error": {
+                        "code": 400,
+                        "message": "failed to load image: "+ "image key does not exist",
+                    }
+                }
+                return jsonify(test2)
+            
+            encoded_img_data = base64.b64encode(open(rows[0][0], "rb").read())            
         except mysql.connector.Error as err:
             test2 = {
                 "success": "false",
                 "error": {
                     "code": 400,
-                    "message": "failed to load image: unable to read the image"
+                    "message": "failed to load image:"+err.msg,
                 }
             }
             return jsonify(test2)
+    else:
+        test2 = {
+                "success": "false",
+                "error": {
+                    "code": 400,
+                    "message": "failed to load image: failed to connect to memcache",
+                }
+            }
+        return jsonify(test2)
+    dictToSend = {'key': key, 'content': encoded_img_data.decode('utf-8')}
 
-    dictToSend = {'key': key, 'content': encoded_img_data}
-    res = requests.post('http://192.168.40.128:5001/put', json=dictToSend)
+    try:
+        res = requests.post('http://localhost:5001/put', json=dictToSend)
+    except requests.exceptions.ConnectionError as err:
+        print(err)
+        test2 = {
+            "success": "false",
+            "error": {
+                "code": 400,
+                "message": "failed to upload image: failed to connect backend"
+            }
+        }
+        return jsonify(test2)
 
     if res.status_code == 400 or res.status_code == 200:
-        test2 = {'success': "true", 'content': encoded_img_data.decode("utf-8")}
+        test2 = {'success': "true", 'content': dictToSend['content']}
         return jsonify(test2)
     else:
         test2 = {

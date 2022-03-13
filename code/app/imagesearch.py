@@ -12,6 +12,7 @@ from base64 import b64encode
 from PIL import Image
 import base64
 import io
+import time
 
 def connect_to_database():
     return mysql.connector.connect(user=db_config['user'], 
@@ -41,13 +42,17 @@ def image_search_form():
 def search_image():
     key = request.form.get("file_key")
     dictToSend = {key: key}
+    if len(key)<1 or len(key)>=44:
+        return render_template("errorpage.html", msg="invalid key, the length of a key has to between 1 char and 44 char")
 
-    res = requests.get('http://192.168.40.128:5001/get/'+key)
+    try:
+        res = requests.get('http://localhost:5001/get/'+key)
+    except requests.exceptions.ConnectionError as err:
+        return render_template("errorpage.html", msg="failed to connect to memcache")
+
 
     dictFromServer = res.json()
-    if res.status_code == 200:
-        #return redirect(url_for('main'))
-        #encoded_img_data = base64.b64encode(dictFromServer['content'])
+    if res.status_code == 200 and dictFromServer:
         encoded_img_data = dictFromServer['content'].encode('ascii')
         
     elif res.status_code == 400:
@@ -57,13 +62,21 @@ def search_image():
         try:
             cursor.execute(query,(key,))
             rows = cursor.fetchall() 
-            print("rows", rows[0][0])
-            im = Image.open(rows[0][0])
-            data = io.BytesIO()
-            im.save(data, rows[0][0].split(".")[-1])
-            encoded_img_data = base64.b64encode(data.getvalue())
+            if len(rows) == 0:
+                return render_template("errorpage.html", msg="image key does not exist")
             
-            #return render_template("imagesearchresult.html", img_link = '/home/lllor/Documents/ece1779/a1/aws_files/code/app/static/images/upload/test.jpeg')
+            print(rows[0][0].split(".")[-1])
+            encoded_img_data = base64.b64encode(open(rows[0][0], "rb").read())
+            """
+            if image_type == "gif":
+                im = Image.open(rows[0][0])
+                data = io.BytesIO()
+                image_type = rows[0][0].split(".")[-1]
+                im.save(data, image_type)
+                encoded_img_data = base64.b64encode(data.getvalue())
+            else:
+            """
+            
         except mysql.connector.Error as err:
             print(err)
             print("Error Code:", err.errno)
@@ -71,10 +84,15 @@ def search_image():
             print("Message", err.msg)
             return render_template("errorpage.html", msg=err.msg)
 
-    dictToSend = {'key': key, 'content': encoded_img_data}
-    res = requests.post('http://192.168.40.128:5001/put', json=dictToSend)
+
+    dictToSend = {'key': key, 'content': encoded_img_data.decode('utf-8')}
+    try:
+        res = requests.post('http://localhost:5001/put', json=dictToSend)
+    except requests.exceptions.ConnectionError as err:
+        return render_template("errorpage.html", msg="failed to connect to memcache")
 
     if res.status_code == 400 or res.status_code == 200:
+        time.sleep(1)
         return render_template("imagesearchresult.html", img_data=encoded_img_data.decode('utf-8'))
     else:
         return render_template("errorpage.html", msg="failed to save to memcache")
